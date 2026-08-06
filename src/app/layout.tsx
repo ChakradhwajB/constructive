@@ -9,7 +9,10 @@ const inter = Inter({
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen">
+      <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" />
+      </head>
+      <body className="flex flex-col min-h-screen relative text-slate-900 dark:text-slate-50">
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
