@@ -5,9 +5,11 @@ import { z } from 'zod';
 
 export const docs = defineDocs({
   dir: 'content/docs',
-  schema: frontmatterSchema.extend({
-    tags: z.array(z.string()).optional(),
-  }),
+  docs: {
+    schema: frontmatterSchema.extend({
+      tags: z.array(z.string()).optional(),
+    }),
+  },
 });
 
 export default defineConfig({
