@@ -53,118 +53,108 @@ export function InteractiveHeroMockup() {
   })();
 
   return (
-    <div className="p-5 space-y-4">
-      <div className="font-mono text-xs select-none leading-relaxed">
-        {codeLines.map((line) => {
-          const isHl = activeLines.includes(line.num);
-          const isDim = !isHl && activeCell.i !== 0 && activeCell.j !== 0; // dim if not highlighted but inside loop
+    <div className="flex flex-col gap-6 w-full max-w-[500px] mx-auto md:mr-0 mt-8 md:mt-0">
+      
+      {/* Code Block Mockup (Top Left) */}
+      <div className="rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 z-10 transition-all duration-300">
+        {/* macOS Header */}
+        <div className="flex items-center gap-1.5 px-4 py-3 border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-zinc-950/50">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+          <span className="ml-2 text-[10px] font-medium text-slate-400">solve.cpp</span>
+        </div>
+        <div className="p-4 overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed text-slate-800 dark:text-slate-200">
+          {codeLines.map((line) => {
+            const isHl = activeLines.includes(line.num);
+            const isDim = !isHl && activeCell.i !== 0 && activeCell.j !== 0;
 
-          return (
-            <div
-              key={line.num}
-              className={`px-2 py-0.5 rounded-sm whitespace-pre transition-colors duration-200 ${
-                isHl
-                  ? "bg-blue-500/10 dark:bg-blue-400/8 text-slate-900 dark:text-slate-100 border-l-2 border-blue-500"
-                  : isDim
-                    ? "text-slate-400 dark:text-slate-600 opacity-60 border-l-2 border-transparent"
-                    : "text-slate-600 dark:text-slate-400 border-l-2 border-transparent"
-              }`}
-            >
-              <span className="inline-block w-4 text-right mr-3 text-slate-300 dark:text-slate-600 font-mono select-none">
-                {line.num}
-              </span>
-              {/* Simple syntax highlighting */}
-              {line.code
-                .split(/(\bfor\b|\bin\b|\bif\b|\belse\b|\bmax\b|dp)/)
-                .map((part, idx) => {
-                  if (["for", "in", "if", "else"].includes(part))
-                    return (
-                      <span
-                        key={idx}
-                        className="text-purple-600 font-semibold dark:text-purple-400"
-                      >
-                        {part}
-                      </span>
-                    );
-                  if (part === "max")
-                    return (
-                      <span
-                        key={idx}
-                        className="text-amber-600 dark:text-amber-500"
-                      >
-                        {part}
-                      </span>
-                    );
-                  if (part === "dp")
-                    return (
-                      <span
-                        key={idx}
-                        className="text-blue-600 dark:text-blue-400"
-                      >
-                        {part}
-                      </span>
-                    );
-                  return part;
-                })}
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={line.num}
+                className={`px-2 py-0.5 rounded-sm whitespace-pre transition-colors duration-200 ${
+                  isHl
+                    ? "bg-purple-500/10 dark:bg-purple-400/8 text-slate-900 dark:text-slate-100 border-l-2 border-purple-500"
+                    : isDim
+                      ? "text-slate-400 dark:text-slate-600 opacity-60 border-l-2 border-transparent"
+                      : "text-slate-600 dark:text-slate-400 border-l-2 border-transparent"
+                }`}
+              >
+                <span className="inline-block w-4 text-right mr-3 text-slate-300 dark:text-slate-600 font-mono select-none">
+                  {line.num}
+                </span>
+                {line.code
+                  .split(/(\bfor\b|\bin\b|\bif\b|\belse\b|\bmax\b|dp)/)
+                  .map((part, idx) => {
+                    if (["for", "in", "if", "else"].includes(part))
+                      return <span key={idx} className="text-purple-600 font-semibold dark:text-purple-400">{part}</span>;
+                    if (part === "max")
+                      return <span key={idx} className="text-amber-600 dark:text-amber-500">{part}</span>;
+                    if (part === "dp")
+                      return <span key={idx} className="text-purple-600 dark:text-purple-400">{part}</span>;
+                    return part;
+                  })}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="border-t border-slate-200 dark:border-slate-800 pt-4 flex items-start gap-5">
-        <div className="flex-1 overflow-x-auto pb-2">
-          <div className="font-mono text-xs select-none">
-            <table
-              className="border-collapse w-full"
-              onMouseLeave={() => setActiveCell({ i: 3, j: 5 })}
-            >
-              <thead>
-                <tr className="bg-slate-50/80 dark:bg-zinc-800/80">
-                  {["w=0", "w=1", "w=2", "w=3", "w=4", "w=5"].map((w, j) => (
-                    <th
-                      key={j}
-                      className="w-9 h-6 border border-slate-100 dark:border-slate-800/50 font-medium text-slate-500 uppercase text-[10px]"
-                    >
-                      {w}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {cells.map((row, i) => (
-                  <tr key={i}>
-                    {row.map((val, j) => {
-                      const isActive = i === activeCell.i && j === activeCell.j;
-                      const isInPath =
-                        i <= activeCell.i && j <= activeCell.j && !isActive; // rough visual trail
-                      return (
-                        <td
-                          key={j}
-                          onMouseEnter={() => setActiveCell({ i, j })}
-                          className={`w-9 h-9 text-center relative cursor-pointer transition-colors duration-200 ${
-                            isActive
-                              ? "bg-blue-500 text-white font-bold outline-[1.5px] outline-blue-500 z-10 shadow-sm"
-                              : isInPath
-                                ? "bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700"
-                                : "bg-white dark:bg-zinc-900/50 text-slate-400 dark:text-slate-500 border border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-zinc-800"
-                          }`}
-                        >
-                          {val}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* DP Grid Mockup (Bottom Right) */}
+      <div className="rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-xl shadow-purple-500/10 dark:shadow-purple-900/20 z-10 transition-all duration-300">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-zinc-950/50">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <span className="ml-2 text-[10px] font-medium text-slate-400">Memory Inspector</span>
           </div>
         </div>
-        <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-zinc-900/50 p-3 flex-1 transition-all duration-300">
-          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">
-              Insight:
-            </span>{" "}
-            {insight}
+        
+        <div className="p-4 overflow-x-auto">
+          <table className="border-collapse w-full" onMouseLeave={() => setActiveCell({ i: 3, j: 5 })}>
+            <thead>
+              <tr className="bg-slate-50/50 dark:bg-zinc-950/50">
+                <th className="w-9 h-6 border border-slate-200/50 dark:border-slate-800/50 font-medium text-slate-500 text-[10px]"></th>
+                {["w=0", "w=1", "w=2", "w=3", "w=4", "w=5"].map((w, j) => (
+                  <th key={j} className="w-9 h-6 border border-slate-200/50 dark:border-slate-800/50 font-medium text-slate-500 text-[10px]">
+                    {w}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {cells.map((row, i) => (
+                <tr key={i}>
+                  <td className="w-9 h-6 border border-slate-200/50 dark:border-slate-800/50 font-medium text-slate-500 text-[10px] text-center bg-slate-50/50 dark:bg-zinc-950/50">
+                    i={i}
+                  </td>
+                  {row.map((val, j) => {
+                    const isActive = i === activeCell.i && j === activeCell.j;
+                    const isInPath = i <= activeCell.i && j <= activeCell.j && !isActive;
+                    return (
+                      <td key={j} onMouseEnter={() => setActiveCell({ i, j })} className="p-0 cursor-pointer">
+                        <div className={`w-9 h-8 flex flex-col items-center justify-center border border-slate-200/50 dark:border-slate-800/50 transition-colors font-mono font-medium text-xs ${
+                          isActive
+                            ? "bg-purple-500/20 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 ring-1 ring-inset ring-purple-500 shadow-[inset_0_0_10px_rgba(124,111,189,0.2)]"
+                            : isInPath
+                            ? "text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-zinc-900/30"
+                            : "text-slate-300 dark:text-slate-600 bg-transparent"
+                        }`}>
+                          {val}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-zinc-950/50 p-3 flex-1 transition-all duration-300">
+          <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
+            <span className="font-semibold text-slate-900 dark:text-slate-100">Insight:</span> {insight}
           </p>
         </div>
       </div>
@@ -225,7 +215,7 @@ export function InteractiveGraphMock() {
             y2={p2.cy}
             className={`transition-all duration-500 ease-in-out ${
               isActive
-                ? "stroke-blue-500/50"
+                ? "stroke-purple-500/50"
                 : "stroke-slate-200 dark:stroke-slate-700/50"
             } ${opacityClass}`}
             strokeWidth={isActive ? (isAffected ? 2.5 : 2) : 1.5}
@@ -269,7 +259,7 @@ export function InteractiveGraphMock() {
               r="15"
               className={`transition-colors duration-300 ${
                 n.active
-                  ? "fill-blue-50 dark:fill-blue-500/20 stroke-blue-500 dark:stroke-blue-400"
+                  ? "fill-purple-50 dark:fill-purple-500/20 stroke-purple-500 dark:stroke-purple-400"
                   : "fill-white dark:fill-zinc-900/50 stroke-slate-200 dark:stroke-slate-700"
               } ${isHovered ? "shadow-lg" : ""}`}
               strokeWidth={isHovered ? "2" : "1.5"}
@@ -280,7 +270,7 @@ export function InteractiveGraphMock() {
               textAnchor="middle"
               dominantBaseline="central"
               className={`text-[11px] font-semibold transition-colors duration-300 ${
-                n.active ? "fill-blue-600 dark:fill-blue-300" : "fill-slate-400"
+                n.active ? "fill-purple-600 dark:fill-purple-300" : "fill-slate-400"
               }`}
             >
               {n.id}

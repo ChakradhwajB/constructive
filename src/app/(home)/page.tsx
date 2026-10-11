@@ -16,17 +16,12 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 md:gap-12 items-start relative z-10">
           {/* Left: copy */}
           <div className="md:pt-8">
-            <p className="text-sm font-medium text-fd-muted-foreground mb-5 tracking-wide uppercase">
+            <p className="text-sm font-medium text-fd-muted-foreground mb-5">
               Competitive Programming Editorials
             </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-[-0.04em] leading-[1.05] mb-6">
-              <span className="text-slate-900 dark:text-slate-50">
-                Stop reading.
-              </span>
-              <br />
-              <span className="bg-linear-to-r from-blue-600 via-indigo-600 to-blue-500 dark:from-blue-400 dark:via-indigo-400 dark:to-blue-300 bg-clip-text text-transparent">
-                Start seeing.
-              </span>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter leading-[0.95] mb-8">
+              Stop Reading.<br />
+              <span className="text-purple-600 dark:text-purple-500 drop-shadow-sm">Start Seeing.</span>
             </h1>
             <p className="text-fd-muted-foreground text-base md:text-lg leading-relaxed mb-8 max-w-lg">
               Constructive turns competitive programming editorials into
@@ -35,23 +30,15 @@ export default function HomePage() {
             </p>
             <Link
               href="/docs"
-              className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-md shadow-slate-900/10 hover:shadow-lg hover:shadow-slate-900/20 transition-all duration-200"
+              className="group inline-flex items-center gap-2 px-6 py-3 rounded-md bg-purple-500 hover:bg-purple-600 text-white font-semibold shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-200"
             >
               Browse Editorials{" "}
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
-          {/* Right: product preview in a browser frame */}
-          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md shadow-[0_20px_50px_rgba(8,112,184,0.07)] dark:shadow-black/40 ring-1 ring-slate-900/5 dark:ring-white/5 relative z-10 overflow-hidden">
-            <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-fd-border/50 bg-fd-muted/30">
-              <span className="w-2.5 h-2.5 rounded-full bg-fd-muted-foreground/20" />
-              <span className="w-2.5 h-2.5 rounded-full bg-fd-muted-foreground/20" />
-              <span className="w-2.5 h-2.5 rounded-full bg-fd-muted-foreground/20" />
-              <span className="ml-3 text-[11px] text-fd-muted-foreground font-medium">
-                0/1 Knapsack — Step 14 of 20
-              </span>
-            </div>
+          {/* Right: interactive mockups */}
+          <div className="relative z-10 flex justify-center lg:justify-end">
             <InteractiveHeroMockup />
           </div>
         </div>
@@ -60,7 +47,7 @@ export default function HomePage() {
       {/* ──── Features: alternating 2-col rows ──── */}
       <section className="px-6 py-20 md:py-28 border-t border-fd-border relative">
         <div className="max-w-5xl mx-auto">
-          <p className="text-sm font-medium text-fd-muted-foreground mb-3 tracking-wide uppercase">
+          <p className="text-sm font-medium text-fd-muted-foreground mb-3">
             Why Constructive
           </p>
           <h2 className="text-3xl md:text-4xl font-bold text-fd-foreground mb-14 max-w-md">
@@ -87,8 +74,8 @@ export default function HomePage() {
               </div>
 
               <div className="md:col-span-2 rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-7 md:p-8 flex flex-col min-h-70">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-5">
-                  <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">
+                <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-5">
+                  <span className="text-purple-600 dark:text-purple-400 font-bold text-sm">
                     ?→!
                   </span>
                 </div>
@@ -163,14 +150,14 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
-              <p className="text-sm font-medium text-fd-muted-foreground mb-3 tracking-wide uppercase">
+              <p className="text-sm font-medium text-fd-muted-foreground mb-3">
                 Library
               </p>
               <h2 className="text-3xl md:text-4xl font-bold text-fd-foreground">
                 Recent Editorials
               </h2>
             </div>
-            <Link href="/docs" className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+            <Link href="/docs" className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
               View all editorials <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -193,21 +180,21 @@ export default function HomePage() {
                 tag: "Data Structures",
               }
             ].map((item, i) => (
-              <Link key={i} href="/docs" className="group flex flex-col justify-between rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-7 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
+              <Link key={i} href="/docs" className="group flex flex-col justify-between rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md shadow-sm p-7 hover:shadow-xl hover:shadow-purple-500/5 transition-all duration-300">
                 <div>
                   <div className="flex items-center mb-5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
                       {item.tag}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                     {item.title}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
                     {item.desc}
                   </p>
                 </div>
-                <div className="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 group-hover:gap-2 transition-all">
+                <div className="text-sm font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1 group-hover:gap-2 transition-all">
                   Read Editorial <ArrowRight className="w-4 h-4" />
                 </div>
               </Link>
@@ -228,7 +215,7 @@ export default function HomePage() {
               "String Matching", "Number Theory", "Binary Search", "Two Pointers", 
               "Bit Manipulation", "Segment Trees", "Trie", "Geometry"
             ].map((topic, i) => (
-              <div key={i} className="px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors cursor-default">
+              <div key={i} className="px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:border-purple-500 dark:hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-300 transition-colors cursor-default">
                 {topic}
               </div>
             ))}
@@ -248,7 +235,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/docs"
-            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-md shadow-slate-900/10 hover:shadow-lg hover:shadow-slate-900/20 transition-all duration-200"
+            className="group inline-flex items-center gap-2 px-8 py-4 rounded-md bg-purple-500 hover:bg-purple-600 text-white font-semibold shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-200"
           >
             Get Started{" "}
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

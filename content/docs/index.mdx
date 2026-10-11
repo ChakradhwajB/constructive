@@ -1,6 +1,7 @@
 ---
 title: Introduction
 description: How do you use this website?
+tags: ["DP", "Medium", "Math"]
 ---
 
 ## Math Test
@@ -10,3 +11,47 @@ If KaTeX is working, this should render as a properly formatted fraction:
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 $$
+
+## Interactive Templates
+
+Here are the custom components you can use in your editorials:
+
+<Insight title="Key Observation">
+The problem reduces to finding the longest path in a Directed Acyclic Graph (DAG). Once we sort the nodes topologically, we can compute the longest path in $O(V + E)$ time!
+</Insight>
+
+<Hint>
+Have you considered sorting the intervals by their end time before applying greedy selection?
+</Hint>
+
+<Complexity time="O(N log N)" space="O(N)" />
+
+### Visualizations
+
+<ArrayView 
+  data={[4, 2, 7, 1, 9, 3]} 
+  activeIndices={[2]} 
+  highlightIndices={[4]} 
+/>
+
+<AdjacencyList 
+  list={{
+    'A': ['B', 'C'],
+    'B': ['D'],
+    'C': ['D', 'E'],
+    'D': [],
+    'E': ['A']
+  }}
+/>
+
+<DPGrid 
+  data={[
+    [0, 0, 0, 0],
+    [0, 3, 3, 3],
+    [0, 3, 4, 7]
+  ]}
+  colLabels={['w=0', 'w=1', 'w=2', 'w=3']}
+  rowLabels={['i=0', 'i=1', 'i=2']}
+  activeRow={2}
+  activeCol={3}
+/>

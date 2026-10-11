@@ -25,7 +25,22 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
-      <div className="flex flex-row gap-2 items-center border-b pb-6">
+      
+      {/* ──── Tags ──── */}
+      {page.data.tags && page.data.tags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mt-4">
+          {page.data.tags.map((tag) => (
+            <span
+              key={tag}
+              className="text-[10px] font-bold text-purple-700 dark:text-purple-200 bg-purple-50 dark:bg-purple-900/30 px-2.5 py-1 rounded-full border border-purple-200 dark:border-purple-800/50"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-row gap-2 items-center border-b pb-6 mt-6">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}

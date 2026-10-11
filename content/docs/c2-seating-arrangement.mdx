@@ -1,0 +1,404 @@
+---
+title: 2232C2. Seating Arrangement (Hard Version)
+description: Codeforces 2232 - A greedy approach with regret to optimally seat friends based on personality.
+tags: ["Greedy", "Constructive", "Two Pointers"]
+---
+
+## Problem Overview
+
+Alice wants to seat as many friends as possible at her party. The friends are lined up and must be seated in the exact order they arrive. 
+Each table has $s$ seats, and there are $x$ tables.
+
+Friends have one of three personalities:
+- **Introverts (I)**: Must sit at an empty table.
+- **Extroverts (E)**: Must sit at a non-empty table.
+- **Ambiverts (A)**: Can sit anywhere.
+
+Once a person is seated, they cannot be moved. 
+
+<Hint>
+Instead of trying to figure out exactly which table everyone sits at, can we track the "state" of our available seats and use Ambiverts dynamically to fix bad situations?
+</Hint>
+
+## The Problem with Strict Greed
+
+If we try to process the line strictly greedily, we will run into issues when we have an Extrovert (E) but all current tables are full or empty.
+
+Imagine a table has $s=2$ seats, and our line is `A, A, E, E`.
+
+<div className="relative pl-10 border-l-2 border-purple-200 dark:border-purple-800/50 my-10 ml-4 flex flex-col gap-8">
+  <div className="relative group">
+    <div className="absolute -left-[49px] top-6 w-4 h-4 rounded-full bg-white dark:bg-zinc-950 border-[3px] border-purple-500 group-hover:scale-125 transition-all duration-300" />
+    <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Step 1: Fill the first table</h4>
+      <p className="text-sm text-slate-500 mb-5">The first two Ambiverts (A) greedily sit together at Table 0. The table is now full.</p>
+      <ArrayView data={["A", "A", "E", "E"]} activeIndices={[0, 1]} />
+    </div>
+  </div>
+
+  <div className="relative group">
+    <div className="absolute -left-[49px] top-6 w-4 h-4 rounded-full bg-purple-500 dark:bg-purple-500 border-[3px] border-purple-500 shadow-[0_0_12px_rgba(124,111,189,0.6)] group-hover:scale-125 transition-all duration-300" />
+    <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-purple-100 dark:border-purple-900/40 shadow-sm ring-1 ring-purple-500/10">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Step 2: The Extroverts are locked out</h4>
+      <p className="text-sm text-slate-500 mb-5">The Extroverts (E) require a non-empty table to sit. Because Table 0 is full and all other tables are empty, both E's are kicked out!</p>
+      <ArrayView data={["A", "A", "E", "E"]} highlightIndices={[0, 1]} activeIndices={[]} />
+    </div>
+  </div>
+</div>
+
+**Total seated:** 2
+
+However, we could have done better! If the second `A` had sat at a *new* empty table instead of joining the first `A`, both `E`s could have joined them!
+
+<div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm my-6 flex flex-col gap-8">
+  <div>
+    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Optimal Play</h4>
+    <p className="text-sm text-slate-500 mb-4">By placing the Ambiverts at separate tables, they act as anchors. Now each Extrovert has a non-empty table to join!</p>
+    <ArrayView data={["A", "E", "A", "E"]} highlightIndices={[0, 2]} activeIndices={[1, 3]} />
+  </div>
+</div>
+
+**Total seated:** 4.
+
+But we are forced to process friends in order, and we can't look into the future. How do we know when an `A` should join an existing table versus open a new one?
+
+## Greedy with Regret
+
+We can solve this using a powerful technique called **Greedy with Regret**. We will always seat people as compactly as possible, but we will keep track of a "regret" state—specifically, how many Ambiverts (`A`) we can conceptually "move" to a new table later if we desperately need to open one for an Extrovert (`E`).
+
+### The Core Invariants
+
+1. **Waitlisting Introverts**: 
+   Since `I`s require an empty table, their only real purpose (other than just taking up a seat) is to serve as table-openers for `E`s. So when we see an `I`, we don't seat them immediately. We add them to an `introvert_count` waitlist. If we ever need to open a table for an `E` (or an `A`), we pull an `I` from the waitlist and seat them together!
+
+2. **The Ambivert Move (Regret)**:
+   If an `A` joins a table that *already has someone at it*, we increment an `ambivert_count`. 
+   Why? Because if we ever need to open a new table for an `E`, we can conceptually pull this `A` away from their current table and use them to open the new table! Since the `A` wasn't the first person at their old table, leaving it will **not** leave the old table empty, so no rules are broken!
+
+   <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm my-6 flex flex-col gap-8">
+     <div>
+       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Before: Stored Regret</h4>
+       <p className="text-sm text-slate-500 mb-4">Table 0 has two Ambiverts. The second 'A' joined a non-empty table, so they are marked as movable (ambivert_count = 1).</p>
+       <ArrayView data={["A", "A", "E"]} highlightIndices={[0]} activeIndices={[1]} />
+     </div>
+     <div className="pt-6 border-t border-slate-200/50 dark:border-slate-800/50">
+       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">After: Executing the Regret</h4>
+       <p className="text-sm text-slate-500 mb-4">An Extrovert needs a table! We conceptually move the second 'A' to Table 1 so the 'E' can sit with them. Table 0 still has the first 'A', so no rules were broken!</p>
+       <ArrayView data={["A", "A", "E"]} highlightIndices={[0]} activeIndices={[1, 2]} />
+     </div>
+   </div>
+
+### The Step-by-Step Logic
+
+For each person in the line, we look at the current active table `j`:
+
+- **If 'I'**: 
+  Add them to the waitlist (`introvert_count++`).
+
+- **If 'E'**:
+  1. **Join**: If the current table is not empty and not full, seat them.
+  2. **Pair with I**: If the table is empty and we have an `I` waitlisted, seat the `I` and `E` together.
+  3. **Regret an A**: If the table is empty and we have an `A` we can move (`ambivert_count > 0`), conceptually move the `A` to the new table, and seat the `E` with them.
+  4. Otherwise, kick them out.
+
+- **If 'A'**:
+  1. **Join**: If the current table is not empty and not full, seat them. This `A` can be moved later, so `ambivert_count++`.
+  2. **Pair with I**: If the table is empty and we have an `I` waitlisted, seat the `I` and `A` together. This `A` can be moved later, so `ambivert_count++`.
+  3. **Sit Alone**: If the table is empty and no `I`s are waiting, sit the `A` alone. They *cannot* be moved later (since they are the only person at the table).
+
+After processing everyone, any `I`s left on the waitlist can safely take any remaining empty tables!
+
+## Pseudocode
+
+Before writing the final code, here is exactly how we maintain our state:
+
+```text
+1. Initialize counters:
+   - introvert_count = 0
+   - ambivert_count = 0
+   - seated = 0
+   - j = 0 (our current table index)
+   - chairs = array of size x, all 0s
+
+2. Loop through each person in the string:
+   - If 'I': introvert_count++
+   
+   - If 'E':
+     - If chairs[j] > 0 and chairs[j] < s:
+       Seat E. (chairs[j]++, seated++)
+     - Else if chairs[j] == 0 and introvert_count > 0 and s > 1:
+       Seat I and E. (introvert_count--, chairs[j] += 2, seated += 2)
+     - Else if chairs[j] == 0 and ambivert_count > 0:
+       Move A and seat E. (ambivert_count--, chairs[j]++, seated++)
+     
+   - If 'A':
+     - If chairs[j] > 0 and chairs[j] < s:
+       Seat A. (chairs[j]++, seated++, ambivert_count++)
+     - Else if chairs[j] == 0:
+       - If introvert_count > 0 and s > 1:
+         Seat I and A. (introvert_count--, chairs[j] += 2, seated += 2, ambivert_count++)
+       - Else:
+         Seat A alone. (chairs[j]++, seated++)
+
+   - After every successful seating, if chairs[j] == s, move to the next table (j++).
+
+3. Clean up:
+   - While introvert_count > 0 and we have empty tables left, seat the I's alone.
+```
+
+## Solution Code
+
+<Tabs items={["C++", "Python", "JavaScript"]}>
+
+<Tab value="C++">
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+void solve() {
+    int n, x, s;
+    cin >> n >> x >> s;
+    string arr;
+    cin >> arr;
+    
+    vector<int> chairs(x, 0);
+    int j = 0;
+    int introvert_count = 0;
+    int ambivert_count = 0;
+    int seated = 0;
+    
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == 'I') {
+            introvert_count++;
+        } else if (arr[i] == 'E') {
+            if (j < x && chairs[j] != 0 && chairs[j] < s) {
+                chairs[j]++;
+                seated++;
+                if (chairs[j] == s && j < x - 1) j++;
+            } else if (j < x && chairs[j] == 0 && introvert_count > 0 && s > 1) {
+                introvert_count--;
+                chairs[j] += 2;
+                seated += 2;
+                if (chairs[j] == s && j < x - 1) j++;
+            } else if (j < x && chairs[j] == 0 && ambivert_count > 0) {
+                ambivert_count--;
+                chairs[j]++;
+                seated++;
+                if (chairs[j] == s && j < x - 1) j++;
+            }
+        } else if (arr[i] == 'A') {
+            if (j < x && chairs[j] != 0 && chairs[j] < s) {
+                chairs[j]++;
+                seated++;
+                ambivert_count++;
+                if (chairs[j] == s && j < x - 1) j++;
+            } else if (j < x && chairs[j] == 0) {
+                if (introvert_count > 0 && s > 1) {
+                    introvert_count--;
+                    chairs[j] += 2;
+                    seated += 2;
+                    ambivert_count++;
+                    if (chairs[j] == s && j < x - 1) j++;
+                } else {
+                    chairs[j]++;
+                    seated++;
+                    if (chairs[j] == s && j < x - 1) j++;
+                }
+            }
+        }
+    }
+    
+    while (introvert_count > 0 && j < x) {
+        if (chairs[j] == 0) {
+            introvert_count--;
+            seated++;
+        }
+        j++;
+    }
+    
+    cout << seated << "\n";
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    int t;
+    if (cin >> t) {
+        while (t--) solve();
+    }
+    return 0;
+}
+```
+</Tab>
+
+<Tab value="Python">
+```python
+import sys
+
+def solve():
+    input_data = sys.stdin.read().split()
+    if not input_data:
+        return
+        
+    t = int(input_data[0])
+    idx = 1
+    
+    out = []
+    for _ in range(t):
+        n = int(input_data[idx])
+        x = int(input_data[idx+1])
+        s = int(input_data[idx+2])
+        arr = input_data[idx+3]
+        idx += 4
+        
+        chairs = [0] * x
+        j = 0
+        introvert_count = 0
+        ambivert_count = 0
+        seated = 0
+        
+        for i in range(n):
+            if arr[i] == 'I':
+                introvert_count += 1
+            elif arr[i] == 'E':
+                if j < x and chairs[j] != 0 and chairs[j] < s:
+                    chairs[j] += 1
+                    seated += 1
+                    if chairs[j] == s and j < x - 1:
+                        j += 1
+                elif j < x and chairs[j] == 0 and introvert_count > 0 and s > 1:
+                    introvert_count -= 1
+                    chairs[j] += 2
+                    seated += 2
+                    if chairs[j] == s and j < x - 1:
+                        j += 1
+                elif j < x and chairs[j] == 0 and ambivert_count > 0:
+                    ambivert_count -= 1
+                    chairs[j] += 1
+                    seated += 1
+                    if chairs[j] == s and j < x - 1:
+                        j += 1
+            elif arr[i] == 'A':
+                if j < x and chairs[j] != 0 and chairs[j] < s:
+                    chairs[j] += 1
+                    seated += 1
+                    ambivert_count += 1
+                    if chairs[j] == s and j < x - 1:
+                        j += 1
+                elif j < x and chairs[j] == 0:
+                    if introvert_count > 0 and s > 1:
+                        introvert_count -= 1
+                        chairs[j] += 2
+                        seated += 2
+                        ambivert_count += 1
+                        if chairs[j] == s and j < x - 1:
+                            j += 1
+                    else:
+                        chairs[j] += 1
+                        seated += 1
+                        if chairs[j] == s and j < x - 1:
+                            j += 1
+                            
+        while introvert_count > 0 and j < x:
+            if chairs[j] == 0:
+                introvert_count -= 1
+                seated += 1
+            j += 1
+            
+        out.append(str(seated))
+        
+    print('\n'.join(out))
+
+if __name__ == '__main__':
+    solve()
+```
+</Tab>
+
+<Tab value="JavaScript">
+```javascript
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync('/dev/stdin', 'utf-8').trim().split(/\s+/).filter(Boolean);
+    if (input.length === 0) return;
+    
+    let currentLine = 0;
+    const t = parseInt(input[currentLine++], 10);
+    const out = [];
+    
+    for (let tc = 0; tc < t; tc++) {
+        const n = parseInt(input[currentLine++], 10);
+        const x = parseInt(input[currentLine++], 10);
+        const s = parseInt(input[currentLine++], 10);
+        const arr = input[currentLine++];
+        
+        const chairs = new Int32Array(x);
+        let j = 0;
+        let introvert_count = 0;
+        let ambivert_count = 0;
+        let seated = 0;
+        
+        for (let i = 0; i < n; i++) {
+            if (arr[i] === 'I') {
+                introvert_count++;
+            } else if (arr[i] === 'E') {
+                if (j < x && chairs[j] !== 0 && chairs[j] < s) {
+                    chairs[j]++;
+                    seated++;
+                    if (chairs[j] === s && j < x - 1) j++;
+                } else if (j < x && chairs[j] === 0 && introvert_count > 0 && s > 1) {
+                    introvert_count--;
+                    chairs[j] += 2;
+                    seated += 2;
+                    if (chairs[j] === s && j < x - 1) j++;
+                } else if (j < x && chairs[j] === 0 && ambivert_count > 0) {
+                    ambivert_count--;
+                    chairs[j]++;
+                    seated++;
+                    if (chairs[j] === s && j < x - 1) j++;
+                }
+            } else if (arr[i] === 'A') {
+                if (j < x && chairs[j] !== 0 && chairs[j] < s) {
+                    chairs[j]++;
+                    seated++;
+                    ambivert_count++;
+                    if (chairs[j] === s && j < x - 1) j++;
+                } else if (j < x && chairs[j] === 0) {
+                    if (introvert_count > 0 && s > 1) {
+                        introvert_count--;
+                        chairs[j] += 2;
+                        seated += 2;
+                        ambivert_count++;
+                        if (chairs[j] === s && j < x - 1) j++;
+                    } else {
+                        chairs[j]++;
+                        seated++;
+                        if (chairs[j] === s && j < x - 1) j++;
+                    }
+                }
+            }
+        }
+        
+        while (introvert_count > 0 && j < x) {
+            if (chairs[j] === 0) {
+                introvert_count--;
+                seated++;
+            }
+            j++;
+        }
+        
+        out.push(seated);
+    }
+    
+    console.log(out.join('\n'));
+}
+solve();
+```
+</Tab>
+
+</Tabs>
+
+<Complexity time="O(N)" space="O(N)" />

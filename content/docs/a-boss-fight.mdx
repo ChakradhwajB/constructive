@@ -1,0 +1,318 @@
+---
+title: 2252 A. Boss Fight
+description: A greedy approach to maximizing card usage before an adaptive shield triggers.
+tags: ["Greedy", "Math", "Constructive"]
+---
+
+## Problem Overview
+
+You are fighting a boss and have an array of spell cards, each dealing a certain amount of damage. You can play them in any order you choose.
+
+The catch? If you play **two identical cards in a row**, the boss's adaptive shield permanently activates. The card that triggers the shield still deals damage, but every card you play after it will deal **0 damage**.
+
+We need to find the optimal order to play our cards to maximize the total damage dealt.
+
+<Hint>
+If you want to play as many cards as possible before the shield activates, how can you use your unique cards to keep your most frequent cards separated?
+</Hint>
+
+## The Naive Approach
+
+When first looking at this, you might think about just sorting the cards or playing them blindly. 
+
+Let's imagine we have a hand of cards: five `10`s, two `5`s, and one `2`. 
+
+If we just group them together or play them haphazardly as `[10, 10, 5, 5, 2, 10, 10, 10]`, we run into an immediate disaster:
+
+<div className="flex flex-col gap-6 items-center bg-white dark:bg-zinc-900/50 p-8 rounded-xl border border-slate-200 dark:border-slate-800 my-8">
+  <div className="w-full">
+    <p className="text-sm font-semibold text-slate-500 mb-3">Naive Play: Shield triggers immediately on the second 10!</p>
+    <ArrayView data={["10", "10", "5", "5", "2", "10", "10", "10"]} activeIndices={[0, 1]} />
+  </div>
+</div>
+
+Because the shield triggers on the second `10`, the remaining 6 cards in our hand are rendered completely useless and will deal 0 damage. We lost a massive amount of potential damage.
+
+<Insight title="Maximizing the Score">
+The absolute worst thing we can do is trigger the shield early. To maximize our score, we should only ever play two identical cards at the **very end** of our hand. 
+
+Because there are no cards left *after* the final trigger, the 0-damage penalty does not affect us!
+</Insight>
+
+## The Interleaving Strategy
+
+To delay the shield as long as possible, we must avoid playing identical cards back-to-back. If we have a single card that appears a lot (like `10`), we can use our other cards (like `5` and `2`) as "spacers" between the `10`s.
+
+But why should we start our sequence with our most frequent card (`10`) instead of a spacer (`5`)? 
+
+If we start with a spacer and alternate (`5, 10, 5, 10`), our two spacers only allow us to place **two** `10`s. 
+But if we start with `10` (`10, 5, 10, 5, 10`), those exact same two spacers allow us to fit **three** `10`s! 
+
+<Insight title="Key Observation">
+Starting with the most frequent card essentially gives us a "free" slot at the very beginning of the sequence, maximizing the total number of cards we can play.
+</Insight>
+
+Let's try interleaving our hand:
+
+<div className="relative pl-10 border-l-2 border-purple-200 dark:border-purple-800/50 my-10 ml-4 flex flex-col gap-8">
+  <div className="relative group">
+    <div className="absolute -left-[49px] top-6 w-4 h-4 rounded-full bg-white dark:bg-zinc-950 border-[3px] border-purple-500 group-hover:scale-125 transition-all duration-300" />
+    <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Step 1: Start with the most frequent card</h4>
+      <p className="text-sm text-slate-500 mb-5">We place our 10s first, using our 5s and 2s as single spacers between them to avoid the shield.</p>
+      <ArrayView data={["10", "5", "10", "5", "10", "2", "10"]} highlightIndices={[0, 2, 4, 6]} activeIndices={[1, 3, 5]} />
+    </div>
+  </div>
+
+  <div className="relative group">
+    <div className="absolute -left-[49px] top-6 w-4 h-4 rounded-full bg-purple-500 dark:bg-purple-500 border-[3px] border-purple-500 shadow-[0_0_12px_rgba(124,111,189,0.6)] group-hover:scale-125 transition-all duration-300" />
+    <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-purple-100 dark:border-purple-900/40 shadow-sm ring-1 ring-purple-500/10">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Step 2: The Final Pair</h4>
+      <p className="text-sm text-slate-500 mb-5">We append our final 10 to the end. It touches the previous 10, triggering the shield, but we've successfully played ALL our cards!</p>
+      <ArrayView data={["10", "5", "10", "5", "10", "2", "10", "10"]} highlightIndices={[0, 1, 2, 3, 4, 5, 6]} activeIndices={[7]} />
+    </div>
+  </div>
+</div>
+
+This illustrates our optimal playing method: **greedily interleave the most frequent card using all other cards as spacers, and dump up to two copies of the most frequent card at the very end.**
+
+## Hitting the Limit
+
+Can we always play every single card in our hand? Not always. It depends entirely on whether we run out of `10`s first, or if we run out of spacers first.
+
+If one card appears too many times, we will eventually run out of spacers. When that happens, what is the absolute maximum **total number of cards** we can play before they start dealing 0 damage?
+
+Let's build the longest possible valid sequence visually. Imagine we have exactly 2 spacers (a `5` and a `2`), and a huge stack of `10`s:
+
+<div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm my-6 flex flex-col gap-8">
+  <div>
+    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">1. The Start (+1)</h4>
+    <p className="text-sm text-slate-500 mb-4">We place one free `10` at the very beginning.</p>
+    <ArrayView data={["10"]} activeIndices={[0]} />
+  </div>
+  <div className="pt-6 border-t border-slate-200/50 dark:border-slate-800/50">
+    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">2. Spacers & Matches (2 × Spacers)</h4>
+    <p className="text-sm text-slate-500 mb-4">For every spacer we play, we can safely attach exactly one `10` after it. Since every spacer brings a matching `10` with it, this step always contributes **(2 × Spacers)** to our total card count.</p>
+    <ArrayView data={["10", "5", "10", "2", "10"]} highlightIndices={[0]} activeIndices={[1, 2, 3, 4]} />
+  </div>
+  <div className="pt-6 border-t border-slate-200/50 dark:border-slate-800/50">
+    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">3. The End (+1)</h4>
+    <p className="text-sm text-slate-500 mb-4">We place one final `10` at the very end to intentionally trigger the shield without penalty.</p>
+    <ArrayView data={["10", "5", "10", "2", "10", "10"]} highlightIndices={[0, 1, 2, 3, 4]} activeIndices={[5]} />
+  </div>
+</div>
+
+By adding these steps together, we see exactly where the math comes from. The core of our sequence is built out of (Spacer + Match) pairs, which is why we multiply our spacers by two. Then we simply add 1 for the start, and 1 for the end!
+
+<Insight title="Key Observation">
+The absolute maximum **total** number of cards that deal damage is exactly **(2 × number of spacers) + 2**. Keep in mind, this maximum is not always achievable (we might run out of cards first!), it is simply an absolute ceiling that we cannot exceed.
+</Insight>
+
+### The Two Scenarios
+
+1. **Scenario 1: We have enough spacers to separate everything**
+   If the total count of cards in our hand is smaller than or equal to this limit, we will successfully place all of them before we run out of spacers. 
+   But what if we have **extra** spacers left over? We just tuck them right next to our other spacers! For example, if we have two `10`s, two `5`s, and two `2`s, we don't just stop at `10, 5, 10, 5`. We can tuck the leftover `2`s right next to the `5`s: `10, 5, 2, 10, 5, 2`. 
+   
+   *(Note: Because our main card is strictly the most frequent card in our hand, no spacer can ever appear more times than it. This mathematically guarantees we will always have enough gaps to distribute identical spacers so they never touch each other!)*
+   
+   <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm my-6 flex flex-col gap-8">
+     <div>
+       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Before: Interleave the 10s</h4>
+       <p className="text-sm text-slate-500 mb-4">We have two `10`s, two `5`s, and two `2`s. First, we interleave all the `10`s with the `5`s.</p>
+       <ArrayView data={["10", "5", "10", "5"]} highlightIndices={[0, 2]} activeIndices={[1, 3]} />
+     </div>
+     <div className="pt-6 border-t border-slate-200/50 dark:border-slate-800/50">
+       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">After: Pack the leftovers</h4>
+       <p className="text-sm text-slate-500 mb-4">We have successfully placed all our `10`s, but the two `2`s remain. We simply pack them right next to the `5`s! Since `5` and `2` are different, no identical cards ever touch.</p>
+       <ArrayView data={["10", "5", "2", "10", "5", "2"]} highlightIndices={[0, 1, 3, 4]} activeIndices={[2, 5]} />
+     </div>
+   </div>
+
+   - **Damage Dealt:** The sum of all cards in our hand.
+
+2. **Scenario 2: The most frequent card overwhelms the spacers**
+   If the total count of cards in our hand exceeds this limit, we will run out of `5`s and `2`s to separate the `10`s. We simply play up to our limit, intentionally triggering the shield on the final pair. Any cards that exceed this limit are forced out *after* the shield triggers, so they deal 0 damage.
+   
+   <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm my-6">
+     <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Scenario 2: Not Enough Spacers</h4>
+     <p className="text-sm text-slate-500 mb-5">We have four 10s and one 5 (5 cards total). Our limit is (2 × 1 spacer) + 2 = 4 total cards. We successfully play exactly 4 cards (triggering the shield on the 4th). The 5th card is forced out after the shield, dealing 0 damage (unhighlighted).</p>
+     <ArrayView data={["10", "5", "10", "10", "10"]} highlightIndices={[0, 1, 2]} activeIndices={[3]} />
+   </div>
+
+   - **Damage Dealt:** The sum of all our spacer cards, plus exactly **(number of spacers + 2)** copies of the most frequent card.
+
+---
+
+## Pseudocode
+
+Before writing the final code, let's break down the logic step-by-step. We just need to find the most frequent card and compare it against the total number of spacers!
+
+```text
+1. Find the most frequent card:
+   - Loop through the hand of cards.
+   - Add each card's value to our total damage counter.
+   - Track the frequency of each card using a hash map.
+   - Keep a record of the absolute highest frequency we've seen (max_freq) and what card that was (max_freq_val).
+
+2. Count our available spacers:
+   - Subtract our max_freq from the total number of cards in our hand. This gives us our `spacers` count.
+
+3. Check Scenario 1 (We have enough spacers):
+   - If max_freq is less than or equal to (spacers + 2):
+     - We can safely play every single card! Output the total damage we calculated in step 1.
+
+4. Check Scenario 2 (The most frequent card overwhelms the spacers):
+   - If max_freq is greater than (spacers + 2):
+     - Calculate the damage from all the spacer cards (total_damage - (max_freq * max_freq_val)).
+     - We are allowed to play exactly (spacers + 2) copies of our frequent card.
+     - Add the spacer damage to the allowed frequent card damage and output the sum.
+```
+
+## Solution Code
+
+<Tabs items={["C++", "Python", "JavaScript"]}>
+
+<Tab value="C++">
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+void solve() {
+    int n;
+    cin >> n;
+    
+    vector<int> freq(1005, 0);
+    long long total_sum = 0;
+    int max_freq = 0;
+    long long max_freq_val = 0;
+    
+    for (int i = 0; i < n; i++) {
+        int a;
+        cin >> a;
+        freq[a]++;
+        total_sum += a;
+        
+        if (freq[a] > max_freq) {
+            max_freq = freq[a];
+            max_freq_val = a;
+        }
+    }
+    
+    int spacers = n - max_freq;
+    if (max_freq <= spacers + 2) {
+        cout << total_sum << "\n";
+    } else {
+        long long others_sum = total_sum - (long long)max_freq * max_freq_val;
+        cout << others_sum + (long long)(spacers + 2) * max_freq_val << "\n";
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    int t;
+    cin >> t;
+    while (t--) {
+        solve();
+    }
+    return 0;
+}
+```
+</Tab>
+
+<Tab value="Python">
+```python
+import sys
+from collections import Counter
+
+def solve():
+    input_data = sys.stdin.read().split()
+    if not input_data:
+        return
+    
+    t = int(input_data[0])
+    idx = 1
+    
+    for _ in range(t):
+        n = int(input_data[idx])
+        idx += 1
+        
+        arr = []
+        for _ in range(n):
+            arr.append(int(input_data[idx]))
+            idx += 1
+            
+        freq = Counter(arr)
+        max_freq = 0
+        max_freq_val = 0
+        total_sum = 0
+        
+        for val, count in freq.items():
+            total_sum += val * count
+            if count > max_freq:
+                max_freq = count
+                max_freq_val = val
+                
+        spacers = n - max_freq
+        if max_freq <= spacers + 2:
+            print(total_sum)
+        else:
+            others_sum = total_sum - max_freq * max_freq_val
+            print(others_sum + (spacers + 2) * max_freq_val)
+
+if __name__ == "__main__":
+    solve()
+```
+</Tab>
+
+<Tab value="JavaScript">
+```javascript
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync('/dev/stdin', 'utf-8').trim().split(/\s+/);
+    if (input.length === 0 || input[0] === "") return;
+    
+    let currentLine = 0;
+    const t = parseInt(input[currentLine++]);
+    
+    for (let tc = 0; tc < t; tc++) {
+        const n = parseInt(input[currentLine++]);
+        const freq = new Map();
+        let totalSum = 0n;
+        let maxFreq = 0;
+        let maxFreqVal = 0n;
+        
+        for (let i = 0; i < n; i++) {
+            const val = BigInt(input[currentLine++]);
+            totalSum += val;
+            
+            const count = (freq.get(val) || 0) + 1;
+            freq.set(val, count);
+            
+            if (count > maxFreq) {
+                maxFreq = count;
+                maxFreqVal = val;
+            }
+        }
+        
+        const spacers = n - maxFreq;
+        if (maxFreq <= spacers + 2) {
+            console.log(totalSum.toString());
+        } else {
+            const othersSum = totalSum - BigInt(maxFreq) * maxFreqVal;
+            const ans = othersSum + BigInt(spacers + 2) * maxFreqVal;
+            console.log(ans.toString());
+        }
+    }
+}
+solve();
+```
+</Tab>
+
+</Tabs>
+
+<Complexity time="O(N)" space="O(N)" />

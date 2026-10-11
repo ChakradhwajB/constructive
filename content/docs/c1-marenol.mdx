@@ -1,0 +1,240 @@
+---
+title: 2254C1. Marenol (Easy Version)
+description: Codeforces 2254 - Discovering movement by 2 through length-3 reversals.
+tags: ["String", "Math", "Invariants", "Constructive"]
+---
+
+## Problem Overview
+
+We are given two binary strings, $a$ and $b$, of the same length $N$. We can perform the following operations any number of times:
+- Replace `001` with `100` (or vice versa)
+- Replace `110` with `011` (or vice versa)
+
+We need to determine if it is possible to transform string $a$ into string $b$.
+
+<Hint>
+Instead of looking at the specific characters being replaced, look at the **geometry** of the operation. What is physically happening to the 3 characters?
+</Hint>
+
+## Why Brute-Force Fails
+
+At first glance, you might be tempted to use a Breadth-First Search (BFS) or a simple simulation to try all possible replacements starting from string $a$ to see if we ever reach string $b$. 
+
+However, look at the constraints: the length of the string $N$ can be up to $2 \cdot 10^5$. The number of possible valid string states grows exponentially. Attempting to simulate these operations will immediately result in a **Time Limit Exceeded (TLE)** or **Memory Limit Exceeded (MLE)**.
+
+Whenever a problem asks if one state can be transformed into another under massive constraints, it is a huge red flag that you should stop simulating and start looking for a *mathematical invariant*.
+
+## The "Flip" Abstraction
+
+Let's carefully analyze the operations physically rather than purely logically:
+- `001` $\leftrightarrow$ `100`: This is exactly a **reversal** (or flip) of the 3 characters.
+- `011` $\leftrightarrow$ `110`: This is also exactly a **reversal** of the 3 characters.
+
+What about the other possible binary strings of length 3? 
+- `101` reversed is `101`
+- `010` reversed is `010`
+- `000` reversed is `000`
+- `111` reversed is `111`
+
+<Insight title="The Universal Flip">
+Why do we check these remaining strings? Notice that if you flip any of these symmetric strings, there is **no visible change** to the array anyway. 
+
+Because of this, we can definitively state that the problem's operations are strictly equivalent to a universal rule: **You are allowed to reverse ANY substring of length 3.**
+</Insight>
+
+### Proving Movement by 2
+
+When you reverse a block of 3 characters, what physically happens?
+- The **center character** (index $i+1$) stays exactly where it is.
+- The **first character** (index $i$) and the **third character** (index $i+2$) swap places.
+
+Essentially, a character on the edge jumps completely over the center character. This means **any character at index $i$ can swap with the character at index $i+2$!** 
+
+<div className="relative pl-10 border-l-2 border-purple-200 dark:border-purple-800/50 my-10 ml-4 flex flex-col gap-8">
+  <div className="relative group">
+    <div className="absolute -left-[49px] top-6 w-4 h-4 rounded-full bg-white dark:bg-zinc-950 border-[3px] border-purple-500 group-hover:scale-125 group-hover:bg-purple-100 dark:group-hover:bg-purple-900 transition-all duration-300" />
+    <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm group-hover:shadow-md group-hover:border-purple-200 dark:group-hover:border-purple-800/60 transition-all duration-300">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Initial State</h4>
+      <p className="text-sm text-slate-500 mb-5">The '1' is sitting in slot 0 (an even index).</p>
+      <ArrayView data={["1", "0", "0", "0", "0"]} activeIndices={[0]} />
+    </div>
+  </div>
+
+  <div className="relative group">
+    <div className="absolute -left-[49px] top-6 w-4 h-4 rounded-full bg-white dark:bg-zinc-950 border-[3px] border-purple-500 group-hover:scale-125 group-hover:bg-purple-100 dark:group-hover:bg-purple-900 transition-all duration-300" />
+    <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-slate-100 dark:border-slate-800/60 shadow-sm group-hover:shadow-md group-hover:border-purple-200 dark:group-hover:border-purple-800/60 transition-all duration-300">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Flip Slots 0, 1, 2</h4>
+      <p className="text-sm text-slate-500 mb-5">The '1' jumps over the center and lands in slot 2.</p>
+      <ArrayView data={["0", "0", "1", "0", "0"]} activeIndices={[2]} highlightIndices={[0]} />
+    </div>
+  </div>
+
+  <div className="relative group">
+    <div className="absolute -left-[49px] top-6 w-4 h-4 rounded-full bg-purple-500 dark:bg-purple-500 border-[3px] border-purple-500 shadow-[0_0_12px_rgba(124,111,189,0.6)] group-hover:scale-125 transition-all duration-300" />
+    <div className="bg-slate-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-purple-100 dark:border-purple-900/40 shadow-sm ring-1 ring-purple-500/10 transition-all duration-300">
+      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">Flip Slots 2, 3, 4</h4>
+      <p className="text-sm text-slate-500 mb-5">The '1' jumps again, landing in slot 4!</p>
+      <ArrayView data={["0", "0", "0", "0", "1"]} activeIndices={[4]} highlightIndices={[0, 2]} />
+    </div>
+  </div>
+</div>
+
+Because a character can only move in steps of 2, it can never change whether it sits in an even slot or an odd slot. However, because swapping index $i$ and $i+2$ is mathematically equivalent to an adjacent swap within the even (or odd) sub-array, we can use these adjacent swaps to generate any permutation (just like Bubble Sort). Therefore, all the characters in even slots can freely shuffle among themselves, and all the characters in odd slots can freely shuffle among themselves.
+
+For string $a$ to be transformable into string $b$, they must satisfy this absolute invariant:
+- The exact characters sitting in the **even slots** of $a$ must match the even slots of $b$.
+- The exact characters sitting in the **odd slots** of $a$ must match the odd slots of $b$.
+
+## Pseudocode
+
+Before writing the final code, let's break down the logic step-by-step. Since we only need to verify that the even slots match and the odd slots match, we just need to count the `1`s!
+
+```text
+1. Create four counters:
+   - a_even: to count '1's in even slots of string A
+   - a_odd: to count '1's in odd slots of string A
+   - b_even: to count '1's in even slots of string B
+   - b_odd: to count '1's in odd slots of string B
+
+2. Loop through every character in string A:
+   - If the character is a '1':
+     - Check its position. If the position is even, add 1 to a_even.
+     - If the position is odd, add 1 to a_odd.
+
+3. Do the exact same loop for string B, updating b_even and b_odd.
+
+4. Final Check:
+   - If a_even equals b_even AND a_odd equals b_odd, output "YES".
+   - Otherwise, output "NO".
+```
+
+## Solution Code
+
+<Tabs items={["C++", "Python", "JavaScript"]}>
+
+<Tab value="C++">
+```cpp
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+void solve() {
+    int n;
+    cin >> n;
+    string a, b;
+    cin >> a >> b;
+    
+    int a_even_1 = 0, a_odd_1 = 0;
+    int b_even_1 = 0, b_odd_1 = 0;
+    
+    for (int i = 0; i < n; i++) {
+        if (a[i] == '1') {
+            if (i % 2 == 0) a_even_1++;
+            else a_odd_1++;
+        }
+        if (b[i] == '1') {
+            if (i % 2 == 0) b_even_1++;
+            else b_odd_1++;
+        }
+    }
+    
+    if (a_even_1 == b_even_1 && a_odd_1 == b_odd_1) {
+        cout << "YES\n";
+    } else {
+        cout << "NO\n";
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    int t;
+    cin >> t;
+    while (t--) solve();
+    return 0;
+}
+```
+</Tab>
+
+<Tab value="Python">
+```python
+import sys
+
+def solve():
+    n = int(sys.stdin.readline())
+    a = sys.stdin.readline().strip()
+    b = sys.stdin.readline().strip()
+    
+    a_even, a_odd = 0, 0
+    b_even, b_odd = 0, 0
+    
+    for i in range(n):
+        if a[i] == '1':
+            if i % 2 == 0:
+                a_even += 1
+            else:
+                a_odd += 1
+        if b[i] == '1':
+            if i % 2 == 0:
+                b_even += 1
+            else:
+                b_odd += 1
+    
+    if a_even == b_even and a_odd == b_odd:
+        print("YES")
+    else:
+        print("NO")
+
+if __name__ == "__main__":
+    t = int(sys.stdin.readline())
+    for _ in range(t):
+        solve()
+```
+</Tab>
+
+<Tab value="JavaScript">
+```javascript
+const fs = require('fs');
+
+function solve() {
+    const input = fs.readFileSync('/dev/stdin', 'utf-8').trim().split(/\s+/).filter(Boolean);
+    if (input.length === 0 || input[0] === "") return;
+    
+    let currentLine = 0;
+    const t = parseInt(input[currentLine++]);
+    
+    for (let tc = 0; tc < t; tc++) {
+        const n = parseInt(input[currentLine++]);
+        const a = input[currentLine++];
+        const b = input[currentLine++];
+        
+        let aEven = 0, aOdd = 0;
+        let bEven = 0, bOdd = 0;
+        
+        for (let i = 0; i < n; i++) {
+            if (a[i] === '1') {
+                if (i % 2 === 0) aEven++;
+                else aOdd++;
+            }
+            if (b[i] === '1') {
+                if (i % 2 === 0) bEven++;
+                else bOdd++;
+            }
+        }
+        
+        if (aEven === bEven && aOdd === bOdd) {
+            console.log("YES");
+        } else {
+            console.log("NO");
+        }
+    }
+}
+
+solve();
+```
+</Tab>
+
+</Tabs>
+
+<Complexity time="O(N)" space="O(N)" />
