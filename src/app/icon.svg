@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="graph-edge-grad" x1="8" y1="6" x2="24" y2="26" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#a855f7" />
+      <stop offset="1" stopColor="#6366f1" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .flow-edge { stroke: #cbd5e1; }
+    .start-node { fill: #f1f5f9; stroke: #94a3b8; }
+    .spine-node-top { fill: #cfcbea; stroke: #9084c8; }
+    .spine-node-mid { fill: #bab4df; stroke: #7c6fbd; }
+    .spine-node-bot { fill: #cfcbea; stroke: #9084c8; }
+
+    @media (prefers-color-scheme: dark) {
+      .flow-edge { stroke: #3f3f46; }
+      .start-node { fill: #18181b; stroke: #71717a; }
+      .spine-node-top { fill: #252038; stroke: #9084c8; }
+      .spine-node-mid { fill: #393356; stroke: #7c6fbd; }
+      .spine-node-bot { fill: #252038; stroke: #9084c8; }
+    }
+  </style>
+
+  <!-- Flow Edges forming "C" -->
+  <path
+    d="M24 8L13 7L7 16L13 25L24 24"
+    class="flow-edge"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Optimal Shortcut Path -->
+  <path
+    d="M13 7L24 24"
+    stroke="url(#graph-edge-grad)"
+    stroke-width="1.8"
+    stroke-dasharray="2.5 2.5"
+    stroke-opacity="0.8"
+  />
+
+  <!-- Auxiliary Node (Top right start) -->
+  <circle cx="24" cy="8" r="3" class="start-node" stroke-width="2" />
+
+  <!-- Spine Nodes -->
+  <circle cx="13" cy="7" r="2.8" class="spine-node-top" stroke-width="2" />
+  <circle cx="7" cy="16" r="3.2" class="spine-node-mid" stroke-width="2" />
+  <circle cx="13" cy="25" r="2.8" class="spine-node-bot" stroke-width="2" />
+
+  <!-- Target Node (Glow destination) -->
+  <circle cx="24" cy="24" r="4.2" fill="#7c6fbd" />
+  <circle cx="24" cy="24" r="2" fill="#ffffff" />
+</svg>
